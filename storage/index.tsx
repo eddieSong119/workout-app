@@ -20,3 +20,20 @@ export const getData = async (key: string) => {
     console.log(err.message);
   }
 };
+
+export const containsKey = async (key: string) => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    return keys.includes(key);
+  } catch (err: any) {
+    console.log(err.message);
+  }
+};
+
+export const removeItem = async (key: string) => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (err: any) {
+    console.log(err.message);
+  }
+};

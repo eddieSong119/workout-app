@@ -8,6 +8,14 @@ import HomeScreen from "../screens/HomeScreen";
 import PlannerScreen from "../screens/PlannerScreen";
 import WorkoutDetailScreen from "../screens/WorkoutDetailScreen";
 
+export type RootStackParamList = {
+  Root: undefined;
+  Welcome: undefined;
+  Home: undefined;
+  Planner: undefined;
+  WorkoutDetail: undefined;
+};
+
 export default function Navigation() {
   return (
     <NavigationContainer>
@@ -16,7 +24,7 @@ export default function Navigation() {
   );
 }
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   return (
