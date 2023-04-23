@@ -29,6 +29,7 @@ export default function WorkoutDetailScreen({ route }: Navigation) {
   const [sequence, setSequence] = useState<SequenceItem[]>([]);
   const [trackerIndex, setTrackerIndex] = useState(-1);
 
+  const startupSeq = ["Go", "1", "2", "3"];
   const { countDown, isRunning, stop, start } = useCountDown(trackerIndex);
 
   console.log(isRunning);
@@ -49,10 +50,15 @@ export default function WorkoutDetailScreen({ route }: Navigation) {
   }, [countDown]);
 
   const addItemToSequence = (index: number) => {
-    const newSequence = [...sequence, workout!.sequence[index]];
+    let newSequence = [];
+    if (index > 0) {
+      newSequence = [...sequence, workout!.sequence[index]];
+    } else {
+      newSequence = [workout!.sequence[index]];
+    }
     setSequence(newSequence);
     setTrackerIndex(index);
-    start(newSequence[index].duration);
+    start(newSequence[index].duration + startupSeq.length);
   };
 
   if (!workout) {
@@ -71,45 +77,74 @@ export default function WorkoutDetailScreen({ route }: Navigation) {
             <PressableText onPress={handleOpen} text={"check sequence"} />
           )}
         >
-          <View>
-            {workout.sequence.map((SequenceItem, index) => {
-              return (
-                <View key={SequenceItem.slug} style={styles.sequenceItem}>
-                  <Text>
-                    {SequenceItem.name} | {SequenceItem.type} |{" "}
-                    {secToMin(SequenceItem.duration)}
-                  </Text>
-                  {index !== workout.sequence.length - 1 ? (
-                    <FontAwesome name="arrow-down" />
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
+          {() => (
+            <View>
+              {workout.sequence.map((SequenceItem, index) => {
+                return (
+                  <View key={SequenceItem.slug} style={styles.sequenceItem}>
+                    <Text>
+                      {SequenceItem.name} | {SequenceItem.type} |{" "}
+                      {secToMin(SequenceItem.duration)}
+                    </Text>
+                    {index !== workout.sequence.length - 1 ? (
+                      <FontAwesome name="arrow-down" />
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </Modal>
       </WorkoutItem>
-      <View style={styles.centerView}>
-        {sequence.length === 0 && (
-          <FontAwesome
-            name="play-circle-o"
-            size={50}
-            onPress={() => addItemToSequence(0)}
-          />
-        )}
-        {sequence.length > 0 && countDown >= 0 && (
-          <View>
-            <Text style={{ fontSize: 24 }}>{secToMin(countDown)}</Text>
+      <View style={styles.wrapper}>
+        <View style={styles.counterUI}>
+          <View style={styles.counterItem}>
+            {sequence.length === 0 ? (
+              <FontAwesome
+                name="play-circle-o"
+                size={50}
+                color={"blue"}
+                onPress={() => addItemToSequence(0)}
+              />
+            ) : isRunning ? (
+              <FontAwesome
+                name="stop-circle-o"
+                size={50}
+                color={"red"}
+                onPress={() => {
+                  stop();
+                }}
+              />
+            ) : (
+              <FontAwesome
+                name="play-circle-o"
+                size={50}
+                color={"blue"}
+                onPress={() => {
+                  hasReachedEnd ? addItemToSequence(0) : start(countDown);
+                }}
+              />
+            )}
           </View>
-        )}
-      </View>
-      <View style={styles.centerView}>
-        <Text style={{ fontSize: 24 }}>
-          {sequence.length === 0
-            ? "Prepare"
-            : hasReachedEnd
-            ? "Great Job"
-            : sequence[trackerIndex].name}
-        </Text>
+          {sequence.length > 0 && countDown >= 0 && (
+            <View style={styles.counterItem}>
+              <Text style={{ fontSize: 24 }}>
+                {countDown > sequence[trackerIndex].duration
+                  ? startupSeq[countDown - sequence[trackerIndex].duration - 1]
+                  : secToMin(countDown)}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.centerView}>
+          <Text style={{ fontSize: 24 }}>
+            {sequence.length === 0
+              ? "Prepare"
+              : hasReachedEnd
+              ? "Great Job"
+              : sequence[trackerIndex].name}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -133,5 +168,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     marginTop: 20,
+  },
+  counterUI: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  counterItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  wrapper: {
+    borderRadius: 10,
+    borderColor: "rgba(0,0,0,0.1)",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    padding: 10,
   },
 });

@@ -16,7 +16,7 @@ export function useCountDown(index: number, initialCount: number = -1) {
           console.log(countDown);
           return countDown - 1;
         });
-      }, 100);
+      }, 1000);
     }
 
     return cleanUp;
